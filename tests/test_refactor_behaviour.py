@@ -19,6 +19,10 @@ from docling_pipelines.oreilly.repairs.isbn978_4_87311_758_4.markdown import (
 from docling_pipelines.cli import parse_page_range
 from docling_pdf2md.images import image_export_prefix
 from docling_pipelines.models import ConversionConfig
+from docling_pipelines.lambda_note.markdown import (
+    normalize_cjk_radicals,
+    polish_markdown as polish_lambda_note_markdown,
+)
 from docling_pipelines.oreilly.markdown.index import extract_index_entries_from_markdown
 from docling_pipelines.oreilly.markdown.polish import (
     polish_markdown,
@@ -149,6 +153,29 @@ class MarkdownPolishTest(unittest.TestCase):
         self.assertEqual(
             apply_markdown_repairs(markdown),
             "また、各変数に関する微分は、backward() で求めることができます。",
+        )
+
+
+class LambdaNoteMarkdownPolishTest(unittest.TestCase):
+    def test_normalizes_cjk_radicals_without_broad_nfkc_changes(self) -> None:
+        self.assertEqual(
+            normalize_cjk_radicals("⽣活 毎⽇ ⼊⼒ ①"),
+            "生活 毎日 入力 ①",
+        )
+
+    def test_removes_watermarks_and_running_chapter_headers(self) -> None:
+        markdown = "\n".join(
+            [
+                "本文",
+                "★ ✵✽✵✻hash",
+                "## 2 第 1 章 イントロダクション",
+                "## 120000 ドル = 120 ヶ月 毎月 $1000",
+                "続き",
+            ]
+        )
+        self.assertEqual(
+            polish_lambda_note_markdown(markdown),
+            "本文\n## 120000 ドル = 120 ヶ月 毎月 $1000\n続き",
         )
 
 
