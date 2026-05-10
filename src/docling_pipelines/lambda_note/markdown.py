@@ -17,9 +17,9 @@ JAPANESE_INTERNAL_SPACE_RE = re.compile(
     rf"([{JAPANESE_TEXT_CHARS}]) +([{JAPANESE_TEXT_CHARS}])"
 )
 SPACE_BEFORE_JAPANESE_PUNCT_RE = re.compile(
-    rf"([{JAPANESE_TEXT_CHARS}A-Za-z0-9）】』」]) +([。、，．！？：；）】』」])"
+    rf"([{JAPANESE_TEXT_CHARS}A-Za-z0-9）】』」]) +([。、，．！？；）】』」])"
 )
-SPACE_AFTER_JAPANESE_PUNCT_RE = re.compile(r"([。、，．！？：；]) +(\S)")
+SPACE_AFTER_JAPANESE_PUNCT_RE = re.compile(r"([。、，．！？；]) +(\S)")
 SPACE_AFTER_JAPANESE_OPEN_BRACKET_RE = re.compile(r"([（「『【]) +")
 SPACE_BEFORE_JAPANESE_CLOSE_BRACKET_RE = re.compile(r" +([）】』」])")
 URL_RE = re.compile(r"https?://|www\.")
@@ -78,6 +78,7 @@ def should_repair_japanese_spacing_line(line: str) -> bool:
         return False
     return not (
         URL_RE.search(line)
+        or "$" in line
         or INLINE_MATH_RE.search(line)
         or INDENTED_CODE_RE.match(line)
         or COMMAND_LINE_RE.match(line)
