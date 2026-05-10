@@ -317,6 +317,20 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
             ),
         )
 
+    def test_repairs_known_chapter_01_formula_placeholders(self) -> None:
+        markdown = "\n".join(
+            [
+                "## 1.2.2 List インターフェース：線形シーケンス",
+                "<!-- formula-not-decoded -->",
+                "## 1.3.4 ランダム性と確率",
+                "<!-- formula-not-decoded -->",
+            ]
+        )
+        repaired = polish_lambda_note_markdown(markdown)
+        self.assertIn("\\operatorname{addFirst}(x)", repaired)
+        self.assertIn("\\operatorname{compare}(x,y)", repaired)
+        self.assertNotIn("<!-- formula-not-decoded -->", repaired)
+
 
 class LambdaNoteMarkdownAuditTest(unittest.TestCase):
     def test_audits_known_lambda_note_quality_issues(self) -> None:

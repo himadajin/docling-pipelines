@@ -57,6 +57,124 @@ COMMAND_FRAME_RE = re.compile(
 )
 CODE_LISTING_HEADING_RE = re.compile(r"^##\s+(リスト\s+\d+(?:\.\d+)?\s*[：:].*)$")
 COMMAND_FRAME_MARKER_RE = re.compile(r"^(?:glyph\[a0\]|✁|✂\s*✁\s*✄\s*glyph\[a0\]\s*✛)$")
+FORMULA_NOT_DECODED = "<!-- formula-not-decoded -->"
+
+CHAPTER_01_FORMULA_REPAIRS = (
+    "$$\n"
+    "\\begin{aligned}\n"
+    "\\operatorname{addFirst}(x) &\\Rightarrow \\operatorname{add}(0,x) \\\\\n"
+    "\\operatorname{removeFirst}() &\\Rightarrow \\operatorname{remove}(0) \\\\\n"
+    "\\operatorname{addLast}(x) &\\Rightarrow \\operatorname{add}(\\operatorname{size}(),x) \\\\\n"
+    "\\operatorname{removeLast}() &\\Rightarrow \\operatorname{remove}(\\operatorname{size}()-1)\n"
+    "\\end{aligned}\n"
+    "$$",
+    "$$\n"
+    "\\operatorname{compare}(x,y)=\n"
+    "\\begin{cases}\n"
+    "<0 & \\text{if } x<y \\\\\n"
+    ">0 & \\text{if } x>y \\\\\n"
+    "=0 & \\text{if } x=y\n"
+    "\\end{cases}\n"
+    "$$",
+    "$$\n"
+    "b^x = \\underbrace{b \\times b \\times \\cdots \\times b}_{x}\n"
+    "$$",
+    "$$\n"
+    "b^x = k\n"
+    "$$",
+    "$$\n"
+    "e = \\lim_{n\\to\\infty}\\left(1+\\frac{1}{n}\\right)^n \\approx 2.71828\n"
+    "$$",
+    "$$\n"
+    "\\int_1^k \\frac{1}{x}\\,dx = \\ln k\n"
+    "$$",
+    "$$\n"
+    "b^{\\log_b k}=k\n"
+    "$$",
+    "$$\n"
+    "\\log_b k = \\frac{\\log_a k}{\\log_a b}\n"
+    "$$",
+    "$$\n"
+    "\\ln k = \\frac{\\log k}{\\log e} = \\frac{\\log k}{(\\ln e)/(\\ln 2)} = (\\ln 2)(\\log k) \\approx 0.693147\\log k\n"
+    "$$",
+    "$$\n"
+    "n! = 1 \\cdot 2 \\cdot 3 \\cdot \\cdots \\cdot n\n"
+    "$$",
+    "$$\n"
+    "n! = \\sqrt{2\\pi n}\\left(\\frac{n}{e}\\right)^n e^{\\alpha(n)}\n"
+    "$$",
+    "$$\n"
+    "\\frac{1}{12n+1} < \\alpha(n) < \\frac{1}{12n}\n"
+    "$$",
+    "$$\n"
+    "\\ln(n!) = n\\ln n - n + \\frac{1}{2}\\ln(2\\pi n) + \\alpha(n)\n"
+    "$$",
+    "$$\n"
+    "\\binom{n}{k}=\\frac{n!}{k!(n-k)!}\n"
+    "$$",
+    "$$\n"
+    "O(f(n)) = \\{g(n): \\text{ある } c>0 \\text{ と } n_0 \\text{ が存在し、任意の } n\\ge n_0 \\text{ について } g(n)\\le c\\cdot f(n) \\text{ を満たす}\\}\n"
+    "$$",
+    "$$\n"
+    "\\begin{aligned}\n"
+    "5n\\log n+8n-200 &\\le 5n\\log n+8n\\log n && (n\\ge2) \\\\\n"
+    "&\\le 13n\\log n\n"
+    "\\end{aligned}\n"
+    "$$",
+    "$$\n"
+    "O(n^{c_1}) \\subset O(n^{c_2})\n"
+    "$$",
+    "$$\n"
+    "O(a) \\subset O(\\log n) \\subset O(n^b) \\subset O(c^n)\n"
+    "$$",
+    "$$\n"
+    "O(n) \\subset O(n\\log n) \\subset O(n^{1+b}) \\subset O(nc^n)\n"
+    "$$",
+    "",
+    "$$\n"
+    "T(n)=2\\log n+O(1)\n"
+    "$$",
+    "$$\n"
+    "T(n)=a+b(n+1)+cn+dn+en\n"
+    "$$",
+    "$$\n"
+    "T(n)=O(n)\n"
+    "$$",
+    "$$\n"
+    "O(f(n_1,\\ldots,n_k)) = \\{g(n_1,\\ldots,n_k): \\text{ある } c>0 \\text{ と } z \\text{ が存在し、} g(n_1,\\ldots,n_k)\\ge z \\text{ を満たす任意の } n_1,\\ldots,n_k \\text{ について } g(n_1,\\ldots,n_k)\\le c\\cdot f(n_1,\\ldots,n_k) \\text{ が成り立つ}\\}\n"
+    "$$",
+    "$$\n"
+    "E[X] = \\sum_{x\\in U} x\\cdot \\Pr\\{X=x\\}\n"
+    "$$",
+    "$$\n"
+    "E[X+Y]=E[X]+E[Y]\n"
+    "$$",
+    "$$\n"
+    "E\\left[\\sum_{i=1}^{k}X_i\\right]=\\sum_{i=1}^{k}E[X_i]\n"
+    "$$",
+    "$$\n"
+    "\\begin{aligned}\n"
+    "E[X] &= \\sum_{i=0}^{k} i\\cdot \\Pr\\{X=i\\} \\\\\n"
+    "&= \\sum_{i=0}^{k} i\\cdot \\binom{k}{i}/2^k \\\\\n"
+    "&= k\\cdot \\sum_{i=0}^{k-1}\\binom{k-1}{i}/2^k \\\\\n"
+    "&= k/2\n"
+    "\\end{aligned}\n"
+    "$$",
+    "$$\n"
+    "I_i = \\begin{cases}1 & i\\text{番めのコイントスの結果が表のとき} \\\\ 0 & \\text{そうでないとき}\\end{cases}\n"
+    "$$",
+    "$$\n"
+    "E[I_i]=(1/2)1+(1/2)0=1/2\n"
+    "$$",
+    "$$\n"
+    "\\begin{aligned}\n"
+    "E[X] &= E\\left[\\sum_{i=1}^{k}I_i\\right] \\\\\n"
+    "&= \\sum_{i=1}^{k}E[I_i] \\\\\n"
+    "&= \\sum_{i=1}^{k}1/2 \\\\\n"
+    "&= k/2\n"
+    "\\end{aligned}\n"
+    "$$",
+)
 
 
 def is_cjk_radical_or_kangxi(char: str) -> bool:
@@ -231,6 +349,41 @@ def repair_known_split_list_fragments(markdown: str) -> str:
     )
 
 
+def repair_chapter_01_formula_placeholders(markdown: str) -> str:
+    if (
+        "## 1.2.2 List インターフェース" not in markdown
+        or "## 1.3.4 ランダム性と確率" not in markdown
+    ):
+        return markdown
+
+    repaired = markdown
+    for formula in CHAPTER_01_FORMULA_REPAIRS:
+        if FORMULA_NOT_DECODED not in repaired:
+            break
+        replacement = formula
+        if not replacement:
+            replacement = ""
+        repaired = repaired.replace(FORMULA_NOT_DECODED, replacement, 1)
+    return re.sub(r"\n{4,}", "\n\n\n", repaired)
+
+
+def repair_chapter_01_formula_order(markdown: str) -> str:
+    euler_formula = (
+        "$$\n"
+        "e = \\lim_{n\\to\\infty}\\left(1+\\frac{1}{n}\\right)^n \\approx 2.71828\n"
+        "$$"
+    )
+    euler_intro = (
+        "次のように定義されるオイラーの定数（Euler's constant） e を底とする対数も"
+        "よく使う ψ 6。そこで、log e k のことを ln k と書き、自然対数"
+        "（natural logarithm） と呼ぶ。"
+    )
+    return markdown.replace(
+        euler_formula + "\n\n" + euler_intro,
+        euler_intro + "\n\n" + euler_formula,
+    )
+
+
 def repair_visible_glyph_markers(markdown: str) -> str:
     lines: list[str] = []
     inside_fenced_code = False
@@ -287,4 +440,6 @@ def polish_markdown(markdown: str) -> str:
 
     markdown = remove_glyph_only_code_blocks("".join(lines))
     markdown = repair_visible_glyph_markers(markdown)
-    return repair_known_split_list_fragments(markdown)
+    markdown = repair_known_split_list_fragments(markdown)
+    markdown = repair_chapter_01_formula_placeholders(markdown)
+    return repair_chapter_01_formula_order(markdown)
