@@ -178,6 +178,29 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
             "本文\n## 120000 ドル = 120 ヶ月 毎月 $1000\n続き",
         )
 
+    def test_repairs_glyph_list_markers(self) -> None:
+        markdown = "\n".join(
+            [
+                "- glyph[a114] 親項目 glyph[a113] 子項目 glyph[a114] 次の親項目",
+                "## glyph[a114] 見出し化された箇条書き",
+                "- glyph[a113] 子項目だけ",
+                "本文 glyph[a114] はそのまま",
+            ]
+        )
+        self.assertEqual(
+            polish_lambda_note_markdown(markdown),
+            "\n".join(
+                [
+                    "- 親項目",
+                    "  - 子項目",
+                    "- 次の親項目",
+                    "- 見出し化された箇条書き",
+                    "  - 子項目だけ",
+                    "本文 glyph[a114] はそのまま",
+                ]
+            ),
+        )
+
 
 class ImagesTest(unittest.TestCase):
     def test_image_export_prefix(self) -> None:

@@ -5,6 +5,13 @@ import unicodedata
 MARKDOWN_FENCE_RE = re.compile(r"^\s*(?:```|~~~)")
 WATERMARK_RE = re.compile(r"^\s*★(?:\s|$).*$")
 RUNNING_CHAPTER_HEADER_RE = re.compile(r"^##\s+\d+\s+第\s*\d+\s*章\b.*$")
+LEADING_GLYPH_LIST_RE = re.compile(
+    r"^(?P<indent>\s*)-\s+glyph\[(?P<glyph>a114|a113)\]\s*(?P<rest>.*)$"
+)
+HEADING_GLYPH_LIST_RE = re.compile(
+    r"^##\s+glyph\[(?P<glyph>a114|a113)\]\s*(?P<rest>.*)$"
+)
+INLINE_GLYPH_MARKER_RE = re.compile(r"\s+glyph\[(a114|a113)\]\s+")
 
 
 def is_cjk_radical_or_kangxi(char: str) -> bool:
@@ -19,6 +26,32 @@ def normalize_cjk_radicals(text: str) -> str:
         else char
         for char in text
     )
+
+
+def glyph_list_prefix(glyph: str) -> str:
+    return "  - " if glyph == "a113" else "- "
+
+
+def split_inline_glyph_list_markers(text: str) -> str:
+    def replace(match: re.Match[str]) -> str:
+        return "\n" + glyph_list_prefix(match.group(1))
+
+    return INLINE_GLYPH_MARKER_RE.sub(replace, text)
+
+
+def repair_glyph_list_markers(line: str) -> str:
+    match = LEADING_GLYPH_LIST_RE.match(line)
+    if match:
+        prefix = match.group("indent") + glyph_list_prefix(match.group("glyph"))
+        return prefix + split_inline_glyph_list_markers(match.group("rest"))
+
+    match = HEADING_GLYPH_LIST_RE.match(line)
+    if match:
+        return glyph_list_prefix(match.group("glyph")) + split_inline_glyph_list_markers(
+            match.group("rest")
+        )
+
+    return line
 
 
 def polish_markdown(markdown: str) -> str:
@@ -44,6 +77,8 @@ def polish_markdown(markdown: str) -> str:
         if RUNNING_CHAPTER_HEADER_RE.match(content):
             continue
 
-        lines.append(normalize_cjk_radicals(content) + line_ending)
+        content = repair_glyph_list_markers(content)
+        content = normalize_cjk_radicals(content)
+        lines.append(content + line_ending)
 
     return "".join(lines)
