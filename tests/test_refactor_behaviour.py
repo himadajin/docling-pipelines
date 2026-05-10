@@ -244,6 +244,39 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
             ),
         )
 
+    def test_repairs_lambda_note_japanese_spacing_without_touching_protected_lines(self) -> None:
+        markdown = "\n".join(
+            [
+                "遅 くする",
+                "影 響",
+                "メモリアクセス 順序",
+                "https://example.com/影 響",
+                "| 影 響 |",
+                "```python",
+                "影 響",
+                "```",
+                "$ echo 影 響",
+                "<!-- formula-not-decoded --> 影 響",
+            ]
+        )
+        self.assertEqual(
+            polish_lambda_note_markdown(markdown),
+            "\n".join(
+                [
+                    "遅くする",
+                    "影響",
+                    "メモリアクセス順序",
+                    "https://example.com/影 響",
+                    "| 影 響 |",
+                    "```python",
+                    "影 響",
+                    "```",
+                    "$ echo 影 響",
+                    "<!-- formula-not-decoded --> 影 響",
+                ]
+            ),
+        )
+
     def test_repairs_visible_glyph_markers_after_code_fences_are_balanced(self) -> None:
         markdown = "\n".join(
             [
@@ -274,6 +307,7 @@ class LambdaNoteMarkdownAuditTest(unittest.TestCase):
                     "## $ ./example",
                     "## リスト 3.1 ： example.S",
                     "## ▲ 図 1.1 例",
+                    "遅 くする",
                 ]
             ),
             encoding="utf-8",
@@ -286,6 +320,7 @@ class LambdaNoteMarkdownAuditTest(unittest.TestCase):
 
         self.assertEqual(totals["glyph"], 1)
         self.assertEqual(totals["cjk_radical"], 1)
+        self.assertEqual(totals["japanese_spacing"], 1)
         self.assertEqual(totals["formula_not_decoded"], 1)
         self.assertEqual(totals["command_heading"], 1)
         self.assertEqual(totals["code_listing_heading"], 1)

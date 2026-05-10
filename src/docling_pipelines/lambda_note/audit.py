@@ -10,6 +10,16 @@ from ..paths import PROJECT_ROOT
 from .catalog import ISBN978_4_908686_06_1, ISBN978_4_908686_16_0
 
 
+JAPANESE_TEXT_CHARS = (
+    r"\u3040-\u30ff"
+    r"\u3400-\u4dbf"
+    r"\u4e00-\u9fff"
+    r"\uf900-\ufaff"
+    r"\u2e80-\u2fff"
+    r"々〆〤"
+)
+
+
 @dataclass(frozen=True)
 class AuditIssue:
     name: str
@@ -45,6 +55,11 @@ AUDIT_ISSUES: tuple[AuditIssue, ...] = (
         "cjk_radical",
         re.compile(r"[\u2e80-\u2fff]"),
         "Kangxi/CJK radical compatibility character",
+    ),
+    AuditIssue(
+        "japanese_spacing",
+        re.compile(rf"[{JAPANESE_TEXT_CHARS}] +[{JAPANESE_TEXT_CHARS}]"),
+        "suspicious internal Japanese spacing",
     ),
     AuditIssue(
         "formula_not_decoded",

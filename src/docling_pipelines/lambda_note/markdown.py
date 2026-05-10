@@ -5,6 +5,38 @@ import unicodedata
 MARKDOWN_FENCE_RE = re.compile(r"^\s*(?:```|~~~)")
 WATERMARK_RE = re.compile(r"^\s*★(?:\s|$).*$")
 RUNNING_CHAPTER_HEADER_RE = re.compile(r"^##\s+\d+\s+第\s*\d+\s*章\b.*$")
+JAPANESE_TEXT_CHARS = (
+    r"\u3040-\u30ff"
+    r"\u3400-\u4dbf"
+    r"\u4e00-\u9fff"
+    r"\uf900-\ufaff"
+    r"\u2e80-\u2fff"
+    r"々〆〤"
+)
+JAPANESE_INTERNAL_SPACE_RE = re.compile(
+    rf"([{JAPANESE_TEXT_CHARS}]) +([{JAPANESE_TEXT_CHARS}])"
+)
+SPACE_BEFORE_JAPANESE_PUNCT_RE = re.compile(
+    rf"([{JAPANESE_TEXT_CHARS}A-Za-z0-9）】』」]) +([。、，．！？：；）】』」])"
+)
+SPACE_AFTER_JAPANESE_PUNCT_RE = re.compile(r"([。、，．！？：；]) +(\S)")
+SPACE_AFTER_JAPANESE_OPEN_BRACKET_RE = re.compile(r"([（「『【]) +")
+SPACE_BEFORE_JAPANESE_CLOSE_BRACKET_RE = re.compile(r" +([）】』」])")
+URL_RE = re.compile(r"https?://|www\.")
+INLINE_MATH_RE = re.compile(r"(?:\$\S.*\S\$|\\\(|\\\[|<!--\s*formula-not-decoded\s*-->)")
+INDENTED_CODE_RE = re.compile(r"^(?: {4,}|\t)")
+COMMAND_LINE_RE = re.compile(r"^\s*(?:\$|#)\s+\S")
+MARKDOWN_TABLE_RE = re.compile(r"^\s*\|")
+MARKDOWN_IMAGE_RE = re.compile(r"^\s*!\[[^]]*]\(")
+CODE_LIKE_LINE_RE = re.compile(
+    r"^\s*(?:"
+    r"[A-Za-z_][A-Za-z0-9_]*\s*[({=;]"
+    r"|[{};]"
+    r"|//"
+    r"|/\*"
+    r"|\*/"
+    r")"
+)
 LEADING_GLYPH_LIST_RE = re.compile(
     r"^(?P<indent>\s*)-\s+glyph\[(?P<glyph>a114|a113)\]\s*(?P<rest>.*)$"
 )
@@ -38,6 +70,37 @@ def normalize_cjk_radicals(text: str) -> str:
         else char
         for char in text
     )
+
+
+def should_repair_japanese_spacing_line(line: str) -> bool:
+    stripped = line.strip()
+    if not stripped:
+        return False
+    return not (
+        URL_RE.search(line)
+        or INLINE_MATH_RE.search(line)
+        or INDENTED_CODE_RE.match(line)
+        or COMMAND_LINE_RE.match(line)
+        or MARKDOWN_TABLE_RE.match(line)
+        or MARKDOWN_IMAGE_RE.match(line)
+        or CODE_LIKE_LINE_RE.match(line)
+    )
+
+
+def repair_japanese_spacing_in_line(line: str) -> str:
+    if not should_repair_japanese_spacing_line(line):
+        return line
+
+    while True:
+        repaired = JAPANESE_INTERNAL_SPACE_RE.sub(r"\1\2", line)
+        repaired = SPACE_BEFORE_JAPANESE_PUNCT_RE.sub(r"\1\2", repaired)
+        repaired = SPACE_AFTER_JAPANESE_PUNCT_RE.sub(r"\1\2", repaired)
+        repaired = SPACE_AFTER_JAPANESE_OPEN_BRACKET_RE.sub(r"\1", repaired)
+        repaired = SPACE_BEFORE_JAPANESE_CLOSE_BRACKET_RE.sub(r"\1", repaired)
+
+        if repaired == line:
+            return repaired
+        line = repaired
 
 
 def glyph_list_prefix(glyph: str) -> str:
@@ -205,6 +268,7 @@ def polish_markdown(markdown: str) -> str:
             continue
         content = repair_code_listing_heading(content)
         content = normalize_cjk_radicals(content)
+        content = repair_japanese_spacing_in_line(content)
         lines.append(content + line_ending)
 
     return repair_visible_glyph_markers(remove_glyph_only_code_blocks("".join(lines)))
