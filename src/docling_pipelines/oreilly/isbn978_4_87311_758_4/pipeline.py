@@ -1,4 +1,4 @@
-from ...pipeline import BookPipeline
+from ..pipeline import OReillyBookPipeline
 from ..repairs.isbn978_4_87311_758_4.document import apply_document_repairs
 from ..repairs.isbn978_4_87311_758_4.index import (
     apply_known_index_repairs,
@@ -8,7 +8,7 @@ from ..repairs.isbn978_4_87311_758_4.markdown import apply_markdown_repairs
 from ..repairs.isbn978_4_87311_758_4.toc import repair_toc_entries
 from ..specs.isbn978_4_87311_758_4 import SPEC
 
-PIPELINE = BookPipeline(
+PIPELINE = OReillyBookPipeline(
     spec=SPEC,
     index_source="docling-tables",
     document_repairs=(apply_document_repairs,),

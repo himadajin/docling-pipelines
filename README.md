@@ -35,11 +35,11 @@ uv run docling-books-836-9 --section chapter-01
 uv run docling-books-906-9 --section stage-01
 ```
 
-Generic pipeline orchestration, Markdown polish, and shared models live under
+Generic pipeline orchestration, CLI parsing, and shared models live under
 `src/docling_pipelines/`. O'Reilly-specific PDF paths, section boundaries,
-output roots, pipeline choices, and repair hooks live under
-`src/docling_pipelines/oreilly/`. Low-level Docling conversion helpers live
-under `src/docling_pdf2md/`.
+output roots, pipeline choices, Markdown rendering, style transforms, and
+repair hooks live under `src/docling_pipelines/oreilly/`. Low-level Docling
+conversion helpers live under `src/docling_pdf2md/`.
 
 For the current O'Reilly pipelines, generated section Markdown is written to
 `books/<isbn>/`, including extracted images under `books/<isbn>/images/`. Ad

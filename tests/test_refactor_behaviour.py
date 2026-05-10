@@ -18,8 +18,8 @@ from docling_pipelines.oreilly.repairs.isbn978_4_87311_758_4.markdown import (
 from docling_pipelines.cli import parse_page_range
 from docling_pdf2md.images import image_export_prefix
 from docling_pipelines.models import ConversionConfig
-from docling_pipelines.markdown.index import extract_index_entries_from_markdown
-from docling_pipelines.markdown.polish import (
+from docling_pipelines.oreilly.markdown.index import extract_index_entries_from_markdown
+from docling_pipelines.oreilly.markdown.polish import (
     polish_markdown,
     repair_markdown_heading_spacing,
     trim_markdown_table_cell_padding,
@@ -61,6 +61,16 @@ class BookSpecTest(unittest.TestCase):
         self.assertTrue(PIPELINE_758_4.is_toc_target(None, (13, 20)))
         self.assertTrue(PIPELINE_758_4.is_index_target("index", None))
         self.assertEqual(PIPELINE_758_4.index_source, "docling-tables")
+
+    def test_generic_pipeline_does_not_import_oreilly_style_modules(self) -> None:
+        pipeline_source = (
+            PROJECT_ROOT / "src" / "docling_pipelines" / "pipeline.py"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("docling_pipelines.oreilly", pipeline_source)
+        self.assertNotIn(".oreilly", pipeline_source)
+        self.assertNotIn(".markdown.index", pipeline_source)
+        self.assertNotIn(".markdown.toc", pipeline_source)
+        self.assertNotIn(".markdown.polish", pipeline_source)
 
     def test_second_and_third_books_format_toc_and_index(self) -> None:
         book = get_book("836-9")

@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from html import unescape
 from pathlib import Path
 
-from ..models import IndexEntry, PendingIndexTermSplitter
-from ..text_utils import repair_japanese_markdown_spacing, repair_japanese_spacing_in_line
+from ...models import IndexEntry, PendingIndexTermSplitter
+from ...text_utils import repair_japanese_markdown_spacing, repair_japanese_spacing_in_line
 INDEX_PAGE_TOKEN = r"(?:[ivxlcdm]+|\d+)"
 INDEX_PAGE_RE = re.compile(rf"{INDEX_PAGE_TOKEN}(?:,\s*{INDEX_PAGE_TOKEN})*")
 INDEX_HEADING_RE = re.compile(r"^(?:記号(?:・数字)?|[A-Z]|[あかさたなはまやらわ]行)$")

@@ -20,9 +20,9 @@ page ranges are acceptable when they improve reproducibility.
 
 - `src/docling_pdf2md/`: reusable Docling PDF-to-Markdown conversion helpers
 - `src/docling_pipelines/`: reusable pipeline orchestration, CLI parsing,
-  models, Markdown polish, and shared transforms
+  models, and shared helpers
 - `src/docling_pipelines/oreilly/`: O'Reilly-specific PDF paths, sections,
-  output roots, pipelines, and repair hooks
+  output roots, pipelines, Markdown rendering, style transforms, and repair hooks
 - `pdf/`: local input PDFs, ignored by Git except for `pdf/README.md`
 - `books/<isbn>/`: current O'Reilly section-split Markdown output
 - `output/<isbn>/ranges/`: current O'Reilly ad hoc page-range Markdown output
@@ -90,7 +90,8 @@ directory and use `diff -qr` rather than visual inspection.
 - Keep reusable CLI parsing in `src/docling_pipelines/cli.py`.
 - Keep Docling-specific conversion helpers in `src/docling_pdf2md/`.
 - Keep O'Reilly-specific PDF paths, section definitions, output roots, pipeline
-  choices, and known repairs in `src/docling_pipelines/oreilly/`.
+  choices, Markdown rendering, style transforms, and known repairs in
+  `src/docling_pipelines/oreilly/`.
 - Prefer small, reproducible changes and verify with a short page range before
   converting the full PDF.
 - Do not make OCR the default unless a future diff shows missing content without

@@ -1,45 +1,17 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
 
 from docling.document_converter import DocumentConverter
 
 from docling_pdf2md.conversion import convert_to_markdown
 
-from .models import (
-    BookSpec,
-    ConversionConfig,
-    DocumentRepair,
-    IndexRepair,
-    MarkdownRepair,
-    PendingIndexTermSplitter,
-    Section,
-    TocRepair,
-)
+from .models import BookSpec, ConversionConfig, Section
 from .reporting import print_result
-from .markdown.index import (
-    IndexExtractionOptions,
-    extract_index_entries_from_docling_tables,
-    extract_index_entries_from_markdown,
-    extract_index_entries_from_pdf_layout,
-    format_index_markdown,
-)
-from .markdown.polish import polish_markdown
-from .markdown.toc import extract_toc_entries, render_toc_markdown
-from .transforms import transform_document
-
-IndexSource = Literal["docling-tables", "pdf-layout"]
 
 
 @dataclass(frozen=True)
 class BookPipeline:
     spec: BookSpec
-    index_source: IndexSource
-    document_repairs: tuple[DocumentRepair, ...] = ()
-    markdown_repairs: tuple[MarkdownRepair, ...] = ()
-    toc_repairs: tuple[TocRepair, ...] = ()
-    index_repairs: tuple[IndexRepair, ...] = ()
-    pending_index_term_splitter: PendingIndexTermSplitter | None = None
     toc_section_key: str = "toc"
     index_section_key: str = "index"
 
@@ -106,18 +78,6 @@ class BookPipeline:
         output_path = self.output_path(page_range, section, output_markdown)
         effective_page_range = section.page_range if section else page_range
 
-        def apply_transforms(document: object) -> None:
-            transform_document(
-                document,
-                self.spec.pdf_path,
-                config,
-                document_repairs=self.document_repairs,
-                normalize_tables=not self.is_index_target(
-                    section_key,
-                    effective_page_range,
-                ),
-            )
-
         def render(document: object, markdown: str) -> str:
             return self.render_markdown(
                 document,
@@ -135,7 +95,12 @@ class BookPipeline:
             markdown=config.markdown,
             images=config.images,
             section_key=section_key,
-            transform=apply_transforms,
+            transform=lambda document: self.transform_document(
+                document,
+                effective_page_range,
+                section_key,
+                config,
+            ),
             render_markdown=render,
             apply_render_markdown=config.apply_markdown_polish,
         )
@@ -158,31 +123,13 @@ class BookPipeline:
         section_key: str | None,
         config: ConversionConfig,
     ) -> str:
-        if self.is_toc_target(section_key, page_range):
-            entries = extract_toc_entries(document)
-            if not entries:
-                return markdown
-            for repair in self.toc_repairs:
-                entries = repair(entries)
-            return render_toc_markdown(entries)
+        return markdown
 
-        if self.is_index_target(section_key, page_range):
-            options = IndexExtractionOptions(
-                pending_term_splitter=self.pending_index_term_splitter,
-            )
-            if self.index_source == "pdf-layout" and self.index_page_range:
-                entries = extract_index_entries_from_pdf_layout(
-                    self.spec.pdf_path,
-                    self.index_page_range,
-                    options,
-                )
-                if not entries:
-                    entries = extract_index_entries_from_markdown(markdown, options)
-            else:
-                entries = extract_index_entries_from_docling_tables(document, options)
-
-            for repair in self.index_repairs:
-                entries = repair(entries)
-            return format_index_markdown(entries, markdown)
-
-        return polish_markdown(markdown, config, self.markdown_repairs)
+    def transform_document(
+        self,
+        document: object,
+        page_range: tuple[int, int] | None,
+        section_key: str | None,
+        config: ConversionConfig,
+    ) -> None:
+        return None
