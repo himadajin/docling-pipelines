@@ -55,3 +55,24 @@ uv run docling-books-758-4 --section chapter-01 --output books/978-4-87311-758-4
 
 OCR is disabled by default because these PDFs already contain extractable
 embedded text. Use `--ocr` only for comparison or investigation.
+
+## Lambda Note pipelines
+
+Lambda Note PDFs are also configured with minimal full-book pipelines. Place
+legally obtained PDFs under `pdf/` with these exact filenames:
+
+```text
+pdf/ISBN978-4-908686-06-1.pdf
+pdf/ISBN978-4-908686-16-0.pdf
+```
+
+Current Lambda Note commands convert configured sections or ad hoc page ranges
+using Docling's default Markdown export, without publisher-specific Markdown
+repairs:
+
+```bash
+uv run docling-lambdanote-06-1 --section chapter-01
+uv run docling-lambdanote-06-1 --all-sections
+uv run docling-lambdanote-16-0 --section chapter-01
+uv run docling-lambdanote-16-0 --all-sections
+```

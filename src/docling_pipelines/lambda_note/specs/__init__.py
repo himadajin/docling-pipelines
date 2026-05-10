@@ -1,0 +1,1 @@
+"""Lambda Note book specifications."""

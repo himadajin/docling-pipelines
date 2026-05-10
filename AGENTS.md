@@ -13,6 +13,13 @@ pdf/ISBN978-4-87311-836-9.pdf
 pdf/ISBN978-4-87311-906-9.pdf
 ```
 
+Current Lambda Note PDFs:
+
+```text
+pdf/ISBN978-4-908686-06-1.pdf
+pdf/ISBN978-4-908686-16-0.pdf
+```
+
 Pipeline configuration can be specialized by source or book. Hard-coded physical
 page ranges are acceptable when they improve reproducibility.
 
@@ -23,6 +30,8 @@ page ranges are acceptable when they improve reproducibility.
   models, and shared helpers
 - `src/docling_pipelines/oreilly/`: O'Reilly-specific PDF paths, sections,
   output roots, pipelines, Markdown rendering, style transforms, and repair hooks
+- `src/docling_pipelines/lambda_note/`: Lambda Note-specific PDF paths,
+  sections, output roots, and pipelines
 - `pdf/`: local input PDFs, ignored by Git except for `pdf/README.md`
 - `books/<isbn>/`: current O'Reilly section-split Markdown output
 - `output/<isbn>/ranges/`: current O'Reilly ad hoc page-range Markdown output
@@ -36,6 +45,8 @@ uv run docling-books-758-4 --help
 uv run docling-books-758-4 --pages 1-2
 uv run docling-books-758-4 --section chapter-01
 uv run docling-books-758-4 --all-sections
+uv run docling-lambdanote-06-1 --section chapter-01
+uv run docling-lambdanote-16-0 --section chapter-01
 uv run python -m compileall -q src tests
 ```
 
@@ -92,6 +103,8 @@ directory and use `diff -qr` rather than visual inspection.
 - Keep O'Reilly-specific PDF paths, section definitions, output roots, pipeline
   choices, Markdown rendering, style transforms, and known repairs in
   `src/docling_pipelines/oreilly/`.
+- Keep Lambda Note-specific PDF paths, section definitions, output roots, and
+  pipeline choices in `src/docling_pipelines/lambda_note/`.
 - Prefer small, reproducible changes and verify with a short page range before
   converting the full PDF.
 - Do not make OCR the default unless a future diff shows missing content without

@@ -3,6 +3,7 @@ from pathlib import Path
 import unittest
 
 from docling_pipelines.oreilly.catalog import get_book
+from docling_pipelines.lambda_note.catalog import get_book as get_lambda_note_book
 from docling_pipelines.oreilly.isbn978_4_87311_758_4.pipeline import (
     PIPELINE as PIPELINE_758_4,
 )
@@ -86,6 +87,27 @@ class BookSpecTest(unittest.TestCase):
         self.assertTrue(PIPELINE_906_9.is_toc_target("toc", (11, 22)))
         self.assertTrue(PIPELINE_906_9.is_index_target("index", (543, 552)))
         self.assertEqual(PIPELINE_906_9.index_source, "pdf-layout")
+
+    def test_lambda_note_books_have_configured_sections(self) -> None:
+        book = get_lambda_note_book("06-1")
+        self.assertEqual(
+            book.pdf_path,
+            PROJECT_ROOT / "pdf" / "ISBN978-4-908686-06-1.pdf",
+        )
+        self.assertEqual(book.output_root, Path("books") / book.book_id)
+        self.assertEqual(book.get_section("chapter-01").page_range, (13, 36))
+        self.assertEqual(book.get_section("chapter-14").page_range, (253, 273))
+        self.assertEqual(book.get_section("index").page_range, (280, 288))
+
+        book = get_lambda_note_book("16-0")
+        self.assertEqual(
+            book.pdf_path,
+            PROJECT_ROOT / "pdf" / "ISBN978-4-908686-16-0.pdf",
+        )
+        self.assertEqual(book.output_root, Path("books") / book.book_id)
+        self.assertEqual(book.get_section("chapter-01").page_range, (13, 22))
+        self.assertEqual(book.get_section("chapter-13").page_range, (243, 248))
+        self.assertEqual(book.get_section("index").page_range, (301, 312))
 
     def test_index_markdown_parser_handles_tables_and_text_fragments(self) -> None:
         markdown = """## 記号・数字
