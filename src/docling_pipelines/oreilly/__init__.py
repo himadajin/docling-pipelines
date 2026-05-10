@@ -1,0 +1,2 @@
+"""Book-specific configuration modules."""
+
