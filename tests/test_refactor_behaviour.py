@@ -23,6 +23,7 @@ from docling_pipelines.lambda_note.markdown import (
     normalize_cjk_radicals,
     polish_markdown as polish_lambda_note_markdown,
 )
+from docling_pipelines.lambda_note.audit import audit_paths, issue_totals
 from docling_pipelines.oreilly.markdown.index import extract_index_entries_from_markdown
 from docling_pipelines.oreilly.markdown.polish import (
     polish_markdown,
@@ -200,6 +201,38 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
                 ]
             ),
         )
+
+
+class LambdaNoteMarkdownAuditTest(unittest.TestCase):
+    def test_audits_known_lambda_note_quality_issues(self) -> None:
+        audit_file = PROJECT_ROOT / "output" / "lambda-note-audit-test.md"
+        audit_file.parent.mkdir(parents=True, exist_ok=True)
+        audit_file.write_text(
+            "\n".join(
+                [
+                    "本文",
+                    "glyph[a114]",
+                    "⽣活",
+                    "<!-- formula-not-decoded -->",
+                    "## $ ./example",
+                    "## リスト 3.1 ： example.S",
+                    "## ▲ 図 1.1 例",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+        try:
+            totals = issue_totals(audit_paths([audit_file]))
+        finally:
+            audit_file.unlink()
+
+        self.assertEqual(totals["glyph"], 1)
+        self.assertEqual(totals["cjk_radical"], 1)
+        self.assertEqual(totals["formula_not_decoded"], 1)
+        self.assertEqual(totals["command_heading"], 1)
+        self.assertEqual(totals["code_listing_heading"], 1)
+        self.assertEqual(totals["figure_caption_heading"], 1)
 
 
 class ImagesTest(unittest.TestCase):
