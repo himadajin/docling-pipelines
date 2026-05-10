@@ -189,6 +189,7 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
                 "glyph[a114] 先頭glyph項目",
                 "ALU glyph[a114] 5B205 ：階層構造のメモリシステム",
                 "- 末尾glyph glyph[a114]",
+                "- 句読点つき 、glyph[a114]",
                 "本文 glyph[a114] はそのまま",
             ]
         )
@@ -207,6 +208,7 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
                     "- ALU",
                     "- 5B205 ：階層構造のメモリシステム",
                     "- 末尾glyph",
+                    "- 句読点つき",
                     "本文 glyph[a114] はそのまま",
                 ]
             ),
@@ -257,6 +259,7 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
                 "```",
                 "$ echo 影 響",
                 "<!-- formula-not-decoded --> 影 響",
+                "x 0 ; : : : ; x r 1 と、整数 からなる列",
             ]
         )
         self.assertEqual(
@@ -273,6 +276,7 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
                     "```",
                     "$ echo 影 響",
                     "<!-- formula-not-decoded --> 影 響",
+                    "x 0 ; : : : ; x r 1 と、整数 からなる列",
                 ]
             ),
         )
@@ -292,6 +296,27 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
             "\n- 本文側のリスト",
         )
 
+    def test_repairs_known_split_frontmatter_list_fragment(self) -> None:
+        markdown = "\n".join(
+            [
+                "MergeSort QuickSort",
+                "",
+                "- 第 12 章：幅優先探索、深さ優先探索",
+                "",
+                "- 第 11 章： 、glyph[a114]",
+            ]
+        )
+        self.assertEqual(
+            polish_lambda_note_markdown(markdown),
+            "\n".join(
+                [
+                    "- 第 11 章：MergeSort、QuickSort",
+                    "",
+                    "- 第 12 章：幅優先探索、深さ優先探索",
+                ]
+            ),
+        )
+
 
 class LambdaNoteMarkdownAuditTest(unittest.TestCase):
     def test_audits_known_lambda_note_quality_issues(self) -> None:
@@ -308,6 +333,10 @@ class LambdaNoteMarkdownAuditTest(unittest.TestCase):
                     "## リスト 3.1 ： example.S",
                     "## ▲ 図 1.1 例",
                     "遅 くする",
+                    "https://example.com/影 響",
+                    "| 影 響 |",
+                    "$ echo 影 響",
+                    "x 0 ; : : : ; x r 1 と、整数 からなる列",
                 ]
             ),
             encoding="utf-8",

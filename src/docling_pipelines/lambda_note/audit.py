@@ -8,15 +8,9 @@ from typing import Iterable, Pattern
 
 from ..paths import PROJECT_ROOT
 from .catalog import ISBN978_4_908686_06_1, ISBN978_4_908686_16_0
-
-
-JAPANESE_TEXT_CHARS = (
-    r"\u3040-\u30ff"
-    r"\u3400-\u4dbf"
-    r"\u4e00-\u9fff"
-    r"\uf900-\ufaff"
-    r"\u2e80-\u2fff"
-    r"々〆〤"
+from .markdown import (
+    JAPANESE_INTERNAL_SPACE_RE,
+    should_repair_japanese_spacing_line,
 )
 
 
@@ -58,7 +52,7 @@ AUDIT_ISSUES: tuple[AuditIssue, ...] = (
     ),
     AuditIssue(
         "japanese_spacing",
-        re.compile(rf"[{JAPANESE_TEXT_CHARS}] +[{JAPANESE_TEXT_CHARS}]"),
+        JAPANESE_INTERNAL_SPACE_RE,
         "suspicious internal Japanese spacing",
     ),
     AuditIssue(
@@ -109,6 +103,8 @@ def audit_markdown_file(path: Path) -> list[AuditFinding]:
     findings: list[AuditFinding] = []
     for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         for issue in AUDIT_ISSUES:
+            if issue.name == "japanese_spacing" and not should_repair_japanese_spacing_line(line):
+                continue
             if issue.pattern.search(line):
                 findings.append(
                     AuditFinding(

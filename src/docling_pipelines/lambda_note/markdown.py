@@ -24,6 +24,7 @@ SPACE_AFTER_JAPANESE_OPEN_BRACKET_RE = re.compile(r"([（「『【]) +")
 SPACE_BEFORE_JAPANESE_CLOSE_BRACKET_RE = re.compile(r" +([）】』」])")
 URL_RE = re.compile(r"https?://|www\.")
 INLINE_MATH_RE = re.compile(r"(?:\$\S.*\S\$|\\\(|\\\[|<!--\s*formula-not-decoded\s*-->)")
+MATH_SYMBOL_RE = re.compile(r"[φγπ⌊⌋]|; *: *: *: *;")
 INDENTED_CODE_RE = re.compile(r"^(?: {4,}|\t)")
 COMMAND_LINE_RE = re.compile(r"^\s*(?:\$|#)\s+\S")
 MARKDOWN_TABLE_RE = re.compile(r"^\s*\|")
@@ -44,7 +45,7 @@ HEADING_GLYPH_LIST_RE = re.compile(
     r"^##\s+glyph\[(?P<glyph>a114|a113)\]\s*(?P<rest>.*)$"
 )
 INLINE_GLYPH_MARKER_RE = re.compile(r"\s+glyph\[(a114|a113)\]\s+")
-TRAILING_GLYPH_MARKER_RE = re.compile(r"\s+glyph\[(?:a114|a113)\]\s*$")
+TRAILING_GLYPH_MARKER_RE = re.compile(r"\s*(?:[、,]\s*)?glyph\[(?:a114|a113)\]\s*$")
 BARE_GLYPH_LIST_RE = re.compile(r"^glyph\[(?P<glyph>a114|a113)\]\s*(?P<rest>.*)$")
 SHORT_LABEL_GLYPH_LIST_RE = re.compile(
     r"^(?P<label>[A-Za-z0-9][A-Za-z0-9 +./-]{0,40})\s+"
@@ -80,6 +81,7 @@ def should_repair_japanese_spacing_line(line: str) -> bool:
         URL_RE.search(line)
         or "$" in line
         or INLINE_MATH_RE.search(line)
+        or MATH_SYMBOL_RE.search(line)
         or INDENTED_CODE_RE.match(line)
         or COMMAND_LINE_RE.match(line)
         or MARKDOWN_TABLE_RE.match(line)
@@ -218,6 +220,17 @@ def remove_glyph_only_code_blocks(markdown: str) -> str:
     return "".join(repaired)
 
 
+def repair_known_split_list_fragments(markdown: str) -> str:
+    return re.sub(
+        r"(?m)^MergeSort QuickSort\n\n"
+        r"- 第 12 章：幅優先探索、深さ優先探索\n\n"
+        r"- 第 11 章：$",
+        "- 第 11 章：MergeSort、QuickSort\n\n"
+        "- 第 12 章：幅優先探索、深さ優先探索",
+        markdown,
+    )
+
+
 def repair_visible_glyph_markers(markdown: str) -> str:
     lines: list[str] = []
     inside_fenced_code = False
@@ -272,4 +285,6 @@ def polish_markdown(markdown: str) -> str:
         content = repair_japanese_spacing_in_line(content)
         lines.append(content + line_ending)
 
-    return repair_visible_glyph_markers(remove_glyph_only_code_blocks("".join(lines)))
+    markdown = remove_glyph_only_code_blocks("".join(lines))
+    markdown = repair_visible_glyph_markers(markdown)
+    return repair_known_split_list_fragments(markdown)
