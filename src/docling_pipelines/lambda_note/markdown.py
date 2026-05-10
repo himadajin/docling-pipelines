@@ -12,6 +12,12 @@ HEADING_GLYPH_LIST_RE = re.compile(
     r"^##\s+glyph\[(?P<glyph>a114|a113)\]\s*(?P<rest>.*)$"
 )
 INLINE_GLYPH_MARKER_RE = re.compile(r"\s+glyph\[(a114|a113)\]\s+")
+COMMAND_FRAME_RE = re.compile(
+    r"^(?:##\s+)?(?P<command>\$\s+.*?)\s*"
+    r"✂\s*(?:✁\s*)?✄\s*(?:glyph\[a0\]\s*)?✛\s*(?P<output>.*)$"
+)
+CODE_LISTING_HEADING_RE = re.compile(r"^##\s+(リスト\s+\d+(?:\.\d+)?\s*[：:].*)$")
+COMMAND_FRAME_MARKER_RE = re.compile(r"^(?:glyph\[a0\]|✁|✂\s*✁\s*✄\s*glyph\[a0\]\s*✛)$")
 
 
 def is_cjk_radical_or_kangxi(char: str) -> bool:
@@ -54,6 +60,36 @@ def repair_glyph_list_markers(line: str) -> str:
     return line
 
 
+def unescape_markdown_code_text(text: str) -> str:
+    return text.replace(r"\_", "_")
+
+
+def render_console_block(command: str, output: str) -> str:
+    lines = ["```console", unescape_markdown_code_text(command.strip())]
+    if output:
+        lines.append(unescape_markdown_code_text(output.strip()))
+    lines.append("```")
+    return "\n".join(lines)
+
+
+def repair_command_frame(line: str) -> str | None:
+    if COMMAND_FRAME_MARKER_RE.match(line.strip()):
+        return None
+
+    match = COMMAND_FRAME_RE.match(line)
+    if match:
+        return render_console_block(match.group("command"), match.group("output"))
+
+    return line
+
+
+def repair_code_listing_heading(line: str) -> str:
+    match = CODE_LISTING_HEADING_RE.match(line)
+    if match:
+        return f"**{match.group(1)}**"
+    return line
+
+
 def polish_markdown(markdown: str) -> str:
     lines: list[str] = []
     inside_fenced_code = False
@@ -78,6 +114,10 @@ def polish_markdown(markdown: str) -> str:
             continue
 
         content = repair_glyph_list_markers(content)
+        content = repair_command_frame(content)
+        if content is None:
+            continue
+        content = repair_code_listing_heading(content)
         content = normalize_cjk_radicals(content)
         lines.append(content + line_ending)
 

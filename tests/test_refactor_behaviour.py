@@ -202,6 +202,38 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
             ),
         )
 
+    def test_repairs_command_frames_and_code_listing_headings(self) -> None:
+        markdown = "\n".join(
+            [
+                "glyph[a0]",
+                "## $ gcc -S -masm=intel example.c ✂ ✄ ✛",
+                "✁",
+                "## $ ./io\\_read\\_pci ✂ ✁ ✄ glyph[a0] ✛ Vendor ID = 8086",
+                "$ ./syscall\\_write ✂ ✁ ✄ glyph[a0] ✛ hello, world",
+                "✂ ✁ ✄ glyph[a0] ✛",
+                "## リスト 3.5 ：真のデータ依存関係がある場合",
+            ]
+        )
+        self.assertEqual(
+            polish_lambda_note_markdown(markdown),
+            "\n".join(
+                [
+                    "```console",
+                    "$ gcc -S -masm=intel example.c",
+                    "```",
+                    "```console",
+                    "$ ./io_read_pci",
+                    "Vendor ID = 8086",
+                    "```",
+                    "```console",
+                    "$ ./syscall_write",
+                    "hello, world",
+                    "```",
+                    "**リスト 3.5 ：真のデータ依存関係がある場合**",
+                ]
+            ),
+        )
+
 
 class LambdaNoteMarkdownAuditTest(unittest.TestCase):
     def test_audits_known_lambda_note_quality_issues(self) -> None:
