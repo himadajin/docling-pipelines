@@ -185,6 +185,10 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
                 "- glyph[a114] 親項目 glyph[a113] 子項目 glyph[a114] 次の親項目",
                 "## glyph[a114] 見出し化された箇条書き",
                 "- glyph[a113] 子項目だけ",
+                "- URL glyph[a114] 次の親項目",
+                "glyph[a114] 先頭glyph項目",
+                "ALU glyph[a114] 5B205 ：階層構造のメモリシステム",
+                "- 末尾glyph glyph[a114]",
                 "本文 glyph[a114] はそのまま",
             ]
         )
@@ -197,6 +201,12 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
                     "- 次の親項目",
                     "- 見出し化された箇条書き",
                     "  - 子項目だけ",
+                    "- URL",
+                    "- 次の親項目",
+                    "- 先頭glyph項目",
+                    "- ALU",
+                    "- 5B205 ：階層構造のメモリシステム",
+                    "- 末尾glyph",
                     "本文 glyph[a114] はそのまま",
                 ]
             ),
@@ -232,6 +242,21 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
                     "**リスト 3.5 ：真のデータ依存関係がある場合**",
                 ]
             ),
+        )
+
+    def test_repairs_visible_glyph_markers_after_code_fences_are_balanced(self) -> None:
+        markdown = "\n".join(
+            [
+                "```",
+                "glyph[a114] glyph[a114]",
+                "```",
+                "",
+                "- glyph[a114] 本文側のリスト",
+            ]
+        )
+        self.assertEqual(
+            polish_lambda_note_markdown(markdown),
+            "\n- 本文側のリスト",
         )
 
 
