@@ -93,6 +93,18 @@ wc -c books/*/*.md
 wc -l books/*/*.md
 ```
 
+When changing conversion scripts and regenerating `books/`, take a snapshot
+after conversion as a backup. Store snapshots under:
+
+```text
+snapshots/<MM-DD-HHMM-{before|after}-short-label>/<generated-output-dir>
+```
+
+Use a short label that makes both the timing and change clear, for example
+`snapshots/05-11-2103-after-cjk-radical-normalize/978-4-908686-06-1`.
+Copy each regenerated output directory under the snapshot directory using the
+same basename it has under `books/` or `output/`.
+
 For a full OCR/no-OCR comparison, write OCR-enabled output to a separate
 directory and use `diff -qr` rather than visual inspection.
 
