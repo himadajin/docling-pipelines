@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from .code.detection import is_code_like_text, is_docling_code_label
-from .models import ConversionConfig, DocumentRepair
-from .text_utils import repair_japanese_spacing_in_line
+from ..code.detection import is_code_like_text, is_docling_code_label
+from ..models import ConversionConfig, DocumentRepair
+from ..text_utils import repair_japanese_spacing_in_line
 
 
 def normalize_text_items(document: object) -> None:

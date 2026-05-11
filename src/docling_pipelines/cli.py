@@ -168,7 +168,8 @@ def run_book_cli(pipeline: BookPipeline) -> None:
 def main() -> None:
     raise SystemExit(
         "Use book-specific commands: "
-        "docling-books-758-4, docling-books-836-9, docling-books-906-9"
+        "docling-books-758-4, docling-books-836-9, docling-books-906-9, "
+        "docling-lambdanote-06-1, docling-lambdanote-16-0"
     )
 
 

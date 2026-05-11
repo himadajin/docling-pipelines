@@ -13,6 +13,13 @@ pdf/ISBN978-4-87311-836-9.pdf
 pdf/ISBN978-4-87311-906-9.pdf
 ```
 
+Current Lambda Note PDFs:
+
+```text
+pdf/ISBN978-4-908686-06-1.pdf
+pdf/ISBN978-4-908686-16-0.pdf
+```
+
 Pipeline configuration can be specialized by source or book. Hard-coded physical
 page ranges are acceptable when they improve reproducibility.
 
@@ -20,9 +27,11 @@ page ranges are acceptable when they improve reproducibility.
 
 - `src/docling_pdf2md/`: reusable Docling PDF-to-Markdown conversion helpers
 - `src/docling_pipelines/`: reusable pipeline orchestration, CLI parsing,
-  models, Markdown polish, and shared transforms
+  models, and shared helpers
 - `src/docling_pipelines/oreilly/`: O'Reilly-specific PDF paths, sections,
-  output roots, pipelines, and repair hooks
+  output roots, pipelines, Markdown rendering, style transforms, and repair hooks
+- `src/docling_pipelines/lambda_note/`: Lambda Note-specific PDF paths,
+  sections, output roots, and pipelines
 - `pdf/`: local input PDFs, ignored by Git except for `pdf/README.md`
 - `books/<isbn>/`: current O'Reilly section-split Markdown output
 - `output/<isbn>/ranges/`: current O'Reilly ad hoc page-range Markdown output
@@ -36,6 +45,8 @@ uv run docling-books-758-4 --help
 uv run docling-books-758-4 --pages 1-2
 uv run docling-books-758-4 --section chapter-01
 uv run docling-books-758-4 --all-sections
+uv run docling-lambdanote-06-1 --section chapter-01
+uv run docling-lambdanote-16-0 --section chapter-01
 uv run python -m compileall -q src tests
 ```
 
@@ -82,6 +93,18 @@ wc -c books/*/*.md
 wc -l books/*/*.md
 ```
 
+When changing conversion scripts and regenerating `books/`, take a snapshot
+after conversion as a backup. Store snapshots under:
+
+```text
+snapshots/<MM-DD-HHMM-{before|after}-short-label>/<generated-output-dir>
+```
+
+Use a short label that makes both the timing and change clear, for example
+`snapshots/05-11-2103-after-cjk-radical-normalize/978-4-908686-06-1`.
+Copy each regenerated output directory under the snapshot directory using the
+same basename it has under `books/` or `output/`.
+
 For a full OCR/no-OCR comparison, write OCR-enabled output to a separate
 directory and use `diff -qr` rather than visual inspection.
 
@@ -90,7 +113,10 @@ directory and use `diff -qr` rather than visual inspection.
 - Keep reusable CLI parsing in `src/docling_pipelines/cli.py`.
 - Keep Docling-specific conversion helpers in `src/docling_pdf2md/`.
 - Keep O'Reilly-specific PDF paths, section definitions, output roots, pipeline
-  choices, and known repairs in `src/docling_pipelines/oreilly/`.
+  choices, Markdown rendering, style transforms, and known repairs in
+  `src/docling_pipelines/oreilly/`.
+- Keep Lambda Note-specific PDF paths, section definitions, output roots, and
+  pipeline choices in `src/docling_pipelines/lambda_note/`.
 - Prefer small, reproducible changes and verify with a short page range before
   converting the full PDF.
 - Do not make OCR the default unless a future diff shows missing content without

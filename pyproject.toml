@@ -3,7 +3,7 @@ name = "docling-pipelines"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "docling==2.93.0",
     "pypdfium2==5.8.0",
@@ -13,6 +13,9 @@ dependencies = [
 docling-books-758-4 = "docling_pipelines.oreilly.isbn978_4_87311_758_4.cli:main"
 docling-books-836-9 = "docling_pipelines.oreilly.isbn978_4_87311_836_9.cli:main"
 docling-books-906-9 = "docling_pipelines.oreilly.isbn978_4_87311_906_9.cli:main"
+docling-lambdanote-06-1 = "docling_pipelines.lambda_note.isbn978_4_908686_06_1.cli:main"
+docling-lambdanote-16-0 = "docling_pipelines.lambda_note.isbn978_4_908686_16_0.cli:main"
+docling-lambdanote-audit = "docling_pipelines.lambda_note.audit:main"
 
 [build-system]
 requires = ["uv_build>=0.11.6,<0.12"]

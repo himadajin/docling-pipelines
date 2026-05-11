@@ -1,13 +1,13 @@
 import re
 
-from ..code.markdown_blocks import (
+from ...code.markdown_blocks import (
     annotate_python_fenced_code_blocks,
     fence_code_like_markdown_blocks,
     remove_empty_fenced_code_blocks,
     split_mixed_fenced_code_blocks,
 )
-from ..models import ConversionConfig, MarkdownRepair
-from ..text_utils import repair_japanese_markdown_spacing
+from ...models import ConversionConfig, MarkdownRepair
+from ...text_utils import repair_japanese_markdown_spacing
 
 
 def polish_markdown(

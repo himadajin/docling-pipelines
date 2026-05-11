@@ -1,7 +1,7 @@
 import re
 import unicodedata
 
-from ..models import TocEntry
+from ...models import TocEntry
 PAGE_TOKEN_RE = re.compile(r"(?:[ivxlcdm]+|\d+)", re.IGNORECASE)
 SECTION_NUMBER_RE = re.compile(r"(?:\d+(?:\.\d+)+|[A-Z](?:\.\d+)?)")
 CHAPTER_NUMBER_RE = re.compile(r"(\d+)\s*章")
