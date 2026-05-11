@@ -1,23 +1,29 @@
 from pathlib import Path
 
 from docling.datamodel.base_models import InputFormat
-from docling.datamodel.pipeline_options import PdfPipelineOptions
+from docling.datamodel.pipeline_options import PdfPipelineOptions, TableFormerMode
 from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling_core.types.doc import ImageRefMode
 
-from .models import MarkdownExportConfig
+from .models import MarkdownExportConfig, TableMode
 
 
 def build_converter(
     do_ocr: bool,
     extract_images: bool = True,
     images_scale: float = 2.0,
+    table_mode: TableMode = TableMode.ACCURATE,
 ) -> DocumentConverter:
     pipeline_options = PdfPipelineOptions()
     pipeline_options.do_ocr = do_ocr
     pipeline_options.generate_page_images = extract_images
     pipeline_options.generate_picture_images = extract_images
     pipeline_options.images_scale = images_scale
+    if table_mode == TableMode.OFF:
+        pipeline_options.do_table_structure = False
+    else:
+        pipeline_options.do_table_structure = True
+        pipeline_options.table_structure_options.mode = TableFormerMode(table_mode)
 
     return DocumentConverter(
         format_options={

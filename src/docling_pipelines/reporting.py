@@ -23,6 +23,7 @@ def print_result(
     if section:
         print(f"Section: {section.key} ({section.title})")
     print(f"OCR: {'on' if config.do_ocr else 'off'}")
+    print(f"Table mode: {config.table_mode.value}")
     print(f"PDF repairs: {'on' if config.apply_pdf_repairs else 'off'}")
     print(f"Markdown polish: {'on' if config.apply_markdown_polish else 'off'}")
     print(f"Markdown spacing: {'on' if config.apply_markdown_spacing else 'off'}")

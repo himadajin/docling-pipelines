@@ -109,6 +109,7 @@ class BookPipeline:
             apply_render_markdown=config.apply_markdown_polish,
             cache=cache_config,
             do_ocr=config.do_ocr,
+            table_mode=config.table_mode,
         )
         print_result(
             self.spec.book_id,

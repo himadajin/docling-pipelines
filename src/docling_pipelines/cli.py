@@ -4,6 +4,7 @@ from pathlib import Path
 
 from docling_pdf2md.cache import DoclingCacheConfig
 from docling_pdf2md.converter import build_converter
+from docling_pdf2md.models import TableMode
 from .models import ConversionConfig, ImageExportConfig
 from .pipeline import BookPipeline
 
@@ -84,6 +85,15 @@ def build_book_parser(pipeline: BookPipeline) -> argparse.ArgumentParser:
         help="Keep Docling image placeholders instead of extracting linked images.",
     )
     parser.add_argument(
+        "--table-mode",
+        choices=[mode.value for mode in TableMode],
+        default=TableMode.ACCURATE.value,
+        help=(
+            "Table structure mode for Docling PDF conversion. "
+            "Use fast or off for speed comparisons."
+        ),
+    )
+    parser.add_argument(
         "--no-pdf-repairs",
         action="store_true",
         help="Disable PDF-specific document repairs for comparison.",
@@ -129,6 +139,7 @@ def parse_args_for_pipeline(pipeline: BookPipeline) -> CliArgs:
         all_sections=args.all_sections,
         conversion=ConversionConfig(
             do_ocr=args.ocr,
+            table_mode=TableMode(args.table_mode),
             apply_pdf_repairs=not args.no_pdf_repairs,
             apply_markdown_polish=not args.no_markdown_polish,
             apply_markdown_spacing=args.markdown_spacing,
@@ -158,6 +169,7 @@ def run_book_cli(pipeline: BookPipeline) -> None:
         args.conversion.do_ocr,
         args.conversion.images.enabled,
         args.conversion.images.images_scale,
+        args.conversion.table_mode,
     )
 
     if args.all_sections:

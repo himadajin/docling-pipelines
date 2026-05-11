@@ -8,6 +8,8 @@ from typing import Any
 
 from docling_core.types.doc import DoclingDocument, ImageRefMode
 
+from .models import TableMode
+
 
 @dataclass(frozen=True)
 class DoclingCacheConfig:
@@ -33,6 +35,7 @@ def docling_cache_key(
     do_ocr: bool,
     extract_images: bool,
     images_scale: float,
+    table_mode: TableMode,
     docling_version: str,
 ) -> str:
     stat = input_pdf.stat()
@@ -46,7 +49,7 @@ def docling_cache_key(
         "pdf_mtime_ns": stat.st_mtime_ns,
         "pdf_size": stat.st_size,
         "section_key": config.section_key,
-        "table_structure": "docling-default",
+        "table_mode": table_mode.value,
         "ocr": do_ocr,
     }
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode(

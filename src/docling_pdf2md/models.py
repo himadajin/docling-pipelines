@@ -1,5 +1,12 @@
 from dataclasses import dataclass
+from enum import StrEnum
 from pathlib import Path
+
+
+class TableMode(StrEnum):
+    ACCURATE = "accurate"
+    FAST = "fast"
+    OFF = "off"
 
 
 @dataclass(frozen=True)

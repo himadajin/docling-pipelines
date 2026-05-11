@@ -21,6 +21,7 @@ from .models import (
     ImageExportConfig,
     ImageExportResult,
     MarkdownExportConfig,
+    TableMode,
 )
 
 DocumentTransform = Callable[[object], None]
@@ -45,6 +46,7 @@ def convert_to_markdown(
     apply_render_markdown: bool = True,
     cache: DoclingCacheConfig = DoclingCacheConfig(),
     do_ocr: bool = False,
+    table_mode: TableMode = TableMode.ACCURATE,
 ) -> tuple[float, ImageExportResult, ConversionProfile, DoclingCacheResult]:
     started_at = perf_counter()
 
@@ -58,6 +60,7 @@ def convert_to_markdown(
             do_ocr=do_ocr,
             extract_images=images.enabled,
             images_scale=images.images_scale,
+            table_mode=table_mode,
             docling_version=version("docling"),
         )
         cache_path = docling_cache_path(cache.root, cache.book_id, key)
