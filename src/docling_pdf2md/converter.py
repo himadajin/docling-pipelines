@@ -1,7 +1,11 @@
 from pathlib import Path
 
 from docling.datamodel.base_models import InputFormat
-from docling.datamodel.pipeline_options import PdfPipelineOptions, TableFormerMode
+from docling.datamodel.pipeline_options import (
+    AcceleratorOptions,
+    PdfPipelineOptions,
+    TableFormerMode,
+)
 from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling_core.types.doc import ImageRefMode
 
@@ -13,6 +17,7 @@ def build_converter(
     extract_images: bool = True,
     images_scale: float = 2.0,
     table_mode: TableMode = TableMode.ACCURATE,
+    num_threads: int | None = None,
 ) -> DocumentConverter:
     pipeline_options = PdfPipelineOptions()
     pipeline_options.do_ocr = do_ocr
@@ -24,6 +29,10 @@ def build_converter(
     else:
         pipeline_options.do_table_structure = True
         pipeline_options.table_structure_options.mode = TableFormerMode(table_mode)
+    if num_threads is not None:
+        pipeline_options.accelerator_options = AcceleratorOptions(
+            num_threads=num_threads,
+        )
 
     return DocumentConverter(
         format_options={

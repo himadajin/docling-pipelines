@@ -110,6 +110,7 @@ class BookPipeline:
             cache=cache_config,
             do_ocr=config.do_ocr,
             table_mode=config.table_mode,
+            num_threads=config.num_threads,
         )
         print_result(
             self.spec.book_id,

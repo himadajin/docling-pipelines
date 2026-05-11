@@ -47,6 +47,7 @@ class CodeRepair:
 class ConversionConfig:
     do_ocr: bool
     table_mode: TableMode = TableMode.ACCURATE
+    num_threads: int | None = None
     apply_pdf_repairs: bool = True
     apply_markdown_polish: bool = True
     apply_markdown_spacing: bool = False

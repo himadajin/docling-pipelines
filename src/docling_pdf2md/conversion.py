@@ -47,6 +47,7 @@ def convert_to_markdown(
     cache: DoclingCacheConfig = DoclingCacheConfig(),
     do_ocr: bool = False,
     table_mode: TableMode = TableMode.ACCURATE,
+    num_threads: int | None = None,
 ) -> tuple[float, ImageExportResult, ConversionProfile, DoclingCacheResult]:
     started_at = perf_counter()
 
@@ -61,6 +62,7 @@ def convert_to_markdown(
             extract_images=images.enabled,
             images_scale=images.images_scale,
             table_mode=table_mode,
+            num_threads=num_threads,
             docling_version=version("docling"),
         )
         cache_path = docling_cache_path(cache.root, cache.book_id, key)

@@ -82,6 +82,19 @@ lost most TOC structure.
 The script prints `Table mode: accurate`, `Table mode: fast`, or
 `Table mode: off` in its result summary.
 
+## Performance Policy
+
+Default to `accurate` table mode and Docling's default thread count for normal
+conversions. This is the safest quality baseline.
+
+For slow table-heavy ranges, especially TOC/index investigation, try
+`--num-threads 8` before changing table mode. In current measurements, 758's TOC
+improved from about 43s to 28s with `accurate --num-threads 8` while keeping the
+same Markdown.
+
+Use `--table-mode fast --num-threads 8` only when a quality diff is acceptable
+or being investigated; it was faster but changed 758's TOC output.
+
 ## Section Boundaries
 
 Docling page ranges are 1-based and inclusive. Current physical page ranges are

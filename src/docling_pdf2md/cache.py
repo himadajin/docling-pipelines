@@ -36,6 +36,7 @@ def docling_cache_key(
     extract_images: bool,
     images_scale: float,
     table_mode: TableMode,
+    num_threads: int | None,
     docling_version: str,
 ) -> str:
     stat = input_pdf.stat()
@@ -45,6 +46,7 @@ def docling_cache_key(
         "extract_images": extract_images,
         "images_scale": images_scale,
         "input_pdf": str(input_pdf.resolve()),
+        "num_threads": num_threads,
         "page_range": page_range,
         "pdf_mtime_ns": stat.st_mtime_ns,
         "pdf_size": stat.st_size,

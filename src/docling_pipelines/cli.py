@@ -36,6 +36,18 @@ def parse_page_range(value: str) -> tuple[int, int]:
     return start, end
 
 
+def parse_positive_int(value: str) -> int:
+    try:
+        number = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("Use a positive integer") from exc
+
+    if number < 1:
+        raise argparse.ArgumentTypeError("Value must be 1 or greater")
+
+    return number
+
+
 def build_parser() -> argparse.ArgumentParser:
     raise RuntimeError("Use build_book_parser() for book-specific commands")
 
@@ -94,6 +106,15 @@ def build_book_parser(pipeline: BookPipeline) -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--num-threads",
+        type=parse_positive_int,
+        metavar="N",
+        help=(
+            "Set Docling accelerator num_threads for model inference. "
+            "Defaults to Docling's configured value."
+        ),
+    )
+    parser.add_argument(
         "--no-pdf-repairs",
         action="store_true",
         help="Disable PDF-specific document repairs for comparison.",
@@ -140,6 +161,7 @@ def parse_args_for_pipeline(pipeline: BookPipeline) -> CliArgs:
         conversion=ConversionConfig(
             do_ocr=args.ocr,
             table_mode=TableMode(args.table_mode),
+            num_threads=args.num_threads,
             apply_pdf_repairs=not args.no_pdf_repairs,
             apply_markdown_polish=not args.no_markdown_polish,
             apply_markdown_spacing=args.markdown_spacing,
@@ -170,6 +192,7 @@ def run_book_cli(pipeline: BookPipeline) -> None:
         args.conversion.images.enabled,
         args.conversion.images.images_scale,
         args.conversion.table_mode,
+        args.conversion.num_threads,
     )
 
     if args.all_sections:
