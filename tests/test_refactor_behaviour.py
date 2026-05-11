@@ -160,8 +160,8 @@ class MarkdownPolishTest(unittest.TestCase):
 class LambdaNoteMarkdownPolishTest(unittest.TestCase):
     def test_normalizes_cjk_radicals_without_broad_nfkc_changes(self) -> None:
         self.assertEqual(
-            normalize_cjk_radicals("⽣活 毎⽇ ⼊⼒ ①"),
-            "生活 毎日 入力 ①",
+            normalize_cjk_radicals("⽣活 毎⽇ ⼊⼒ ⻑さ ⻄ ⻫藤 ⻩色 ①"),
+            "生活 毎日 入力 長さ 西 斉藤 黄色 ①",
         )
 
     def test_removes_watermarks_and_running_chapter_headers(self) -> None:
@@ -256,6 +256,7 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
                 "| 影 響 |",
                 "```python",
                 "影 響",
+                "⻑さ ⽣活",
                 "```",
                 "$ echo 影 響",
                 "<!-- formula-not-decoded --> 影 響",
@@ -273,6 +274,7 @@ class LambdaNoteMarkdownPolishTest(unittest.TestCase):
                     "| 影 響 |",
                     "```python",
                     "影 響",
+                    "長さ 生活",
                     "```",
                     "$ echo 影 響",
                     "<!-- formula-not-decoded --> 影 響",

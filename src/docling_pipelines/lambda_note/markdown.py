@@ -58,6 +58,12 @@ COMMAND_FRAME_RE = re.compile(
 CODE_LISTING_HEADING_RE = re.compile(r"^##\s+(リスト\s+\d+(?:\.\d+)?\s*[：:].*)$")
 COMMAND_FRAME_MARKER_RE = re.compile(r"^(?:glyph\[a0\]|✁|✂\s*✁\s*✄\s*glyph\[a0\]\s*✛)$")
 FORMULA_NOT_DECODED = "<!-- formula-not-decoded -->"
+CJK_RADICAL_COMPATIBILITY_MAP = {
+    "⻑": "長",
+    "⻄": "西",
+    "⻫": "斉",
+    "⻩": "黄",
+}
 
 CHAPTER_01_FORMULA_REPAIRS = (
     "$$\n"
@@ -184,7 +190,7 @@ def is_cjk_radical_or_kangxi(char: str) -> bool:
 
 def normalize_cjk_radicals(text: str) -> str:
     return "".join(
-        unicodedata.normalize("NFKC", char)
+        CJK_RADICAL_COMPATIBILITY_MAP.get(char, unicodedata.normalize("NFKC", char))
         if is_cjk_radical_or_kangxi(char)
         else char
         for char in text
@@ -398,7 +404,7 @@ def repair_visible_glyph_markers(markdown: str) -> str:
             continue
 
         if inside_fenced_code:
-            lines.append(line)
+            lines.append(normalize_cjk_radicals(content) + line_ending)
             continue
 
         lines.append(repair_glyph_list_markers(content) + line_ending)
