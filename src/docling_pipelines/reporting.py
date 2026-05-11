@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from docling_pdf2md.cache import DoclingCacheResult
 from docling_pdf2md.models import ConversionProfile, ImageExportResult
 
 from .models import ConversionConfig, Section
@@ -15,6 +16,7 @@ def print_result(
     image_result: ImageExportResult,
     section: Section | None = None,
     profile: ConversionProfile | None = None,
+    cache_result: DoclingCacheResult | None = None,
 ) -> None:
     print(f"Book: {book_id}")
     print(f"Input: {input_pdf}")
@@ -33,6 +35,10 @@ def print_result(
         print(f"Pages: {start}-{end}")
     else:
         print("Pages: all")
+    if cache_result:
+        print(f"Cache: {cache_result.status}")
+        if cache_result.path:
+            print(f"Cache path: {cache_result.path.resolve()}")
     print(f"Output: {output_markdown.resolve()}")
     print(f"Output size: {output_markdown.stat().st_size:,} bytes")
     print(f"Elapsed: {elapsed:.1f} seconds")

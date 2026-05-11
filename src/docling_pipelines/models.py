@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
+from docling_pdf2md.cache import DoclingCacheConfig
 from docling_pdf2md.models import ImageExportConfig, MarkdownExportConfig
 
 
@@ -51,6 +52,7 @@ class ConversionConfig:
     profile: bool = False
     markdown: MarkdownExportConfig = MarkdownExportConfig()
     images: ImageExportConfig = ImageExportConfig()
+    cache: DoclingCacheConfig = DoclingCacheConfig()
 
 
 @dataclass(frozen=True)

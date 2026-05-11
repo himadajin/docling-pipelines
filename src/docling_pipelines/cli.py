@@ -2,6 +2,7 @@ import argparse
 from dataclasses import dataclass
 from pathlib import Path
 
+from docling_pdf2md.cache import DoclingCacheConfig
 from docling_pdf2md.converter import build_converter
 from .models import ConversionConfig, ImageExportConfig
 from .pipeline import BookPipeline
@@ -102,6 +103,16 @@ def build_book_parser(pipeline: BookPipeline) -> argparse.ArgumentParser:
         action="store_true",
         help="Print per-stage conversion timings after the result summary.",
     )
+    parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Disable the Docling JSON document cache.",
+    )
+    parser.add_argument(
+        "--refresh-cache",
+        action="store_true",
+        help="Rebuild the Docling JSON document cache for this conversion.",
+    )
     return parser
 
 
@@ -125,6 +136,11 @@ def parse_args_for_pipeline(pipeline: BookPipeline) -> CliArgs:
             images=ImageExportConfig(
                 enabled=not args.no_images,
                 output_dir=pipeline.spec.image_output_dir,
+            ),
+            cache=DoclingCacheConfig(
+                enabled=not args.no_cache,
+                refresh=args.refresh_cache,
+                book_id=pipeline.spec.book_id,
             ),
         ),
     )

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from docling.document_converter import DocumentConverter
@@ -87,7 +87,11 @@ class BookPipeline:
                 config,
             )
 
-        elapsed, image_result, profile = convert_to_markdown(
+        cache_config = config.cache
+        if cache_config.section_key != section_key:
+            cache_config = replace(cache_config, section_key=section_key)
+
+        elapsed, image_result, profile, cache_result = convert_to_markdown(
             converter=converter,
             input_pdf=self.spec.pdf_path,
             output_markdown=output_path,
@@ -103,6 +107,8 @@ class BookPipeline:
             ),
             render_markdown=render,
             apply_render_markdown=config.apply_markdown_polish,
+            cache=cache_config,
+            do_ocr=config.do_ocr,
         )
         print_result(
             self.spec.book_id,
@@ -114,6 +120,7 @@ class BookPipeline:
             image_result,
             section,
             profile,
+            cache_result,
         )
 
     def render_markdown(
