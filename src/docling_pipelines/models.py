@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from docling_pdf2md.models import ImageExportConfig, MarkdownExportConfig
+from docling_pdf2md.cache import DoclingCacheConfig
+from docling_pdf2md.models import ImageExportConfig, MarkdownExportConfig, TableMode
 
 
 @dataclass(frozen=True)
@@ -45,11 +46,15 @@ class CodeRepair:
 @dataclass(frozen=True)
 class ConversionConfig:
     do_ocr: bool
+    table_mode: TableMode = TableMode.ACCURATE
+    num_threads: int | None = None
     apply_pdf_repairs: bool = True
     apply_markdown_polish: bool = True
     apply_markdown_spacing: bool = False
+    profile: bool = False
     markdown: MarkdownExportConfig = MarkdownExportConfig()
     images: ImageExportConfig = ImageExportConfig()
+    cache: DoclingCacheConfig = DoclingCacheConfig()
 
 
 @dataclass(frozen=True)

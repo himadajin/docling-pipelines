@@ -1,6 +1,7 @@
 import argparse
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 from docling_pipelines.oreilly.catalog import get_book
 from docling_pipelines.lambda_note.catalog import get_book as get_lambda_note_book
@@ -16,8 +17,13 @@ from docling_pipelines.oreilly.isbn978_4_87311_906_9.pipeline import (
 from docling_pipelines.oreilly.repairs.isbn978_4_87311_758_4.markdown import (
     apply_markdown_repairs,
 )
-from docling_pipelines.cli import parse_page_range
+from docling_pipelines.cli import (
+    parse_args_for_pipeline,
+    parse_page_range,
+    parse_positive_int,
+)
 from docling_pdf2md.images import image_export_prefix
+from docling_pdf2md.models import TableMode
 from docling_pipelines.models import ConversionConfig
 from docling_pipelines.lambda_note.markdown import (
     normalize_cjk_radicals,
@@ -48,6 +54,51 @@ class ParsePageRangeTest(unittest.TestCase):
     def test_rejects_descending_range(self) -> None:
         with self.assertRaises(argparse.ArgumentTypeError):
             parse_page_range("10-1")
+
+    def test_parses_positive_int(self) -> None:
+        self.assertEqual(parse_positive_int("8"), 8)
+
+    def test_rejects_non_positive_int(self) -> None:
+        with self.assertRaises(argparse.ArgumentTypeError):
+            parse_positive_int("0")
+
+    def test_parses_table_mode(self) -> None:
+        with patch(
+            "sys.argv",
+            [
+                "docling-books-758-4",
+                "--pages",
+                "13-20",
+                "--table-mode",
+                "fast",
+            ],
+        ):
+            args = parse_args_for_pipeline(PIPELINE_758_4)
+
+        self.assertEqual(args.page_range, (13, 20))
+        self.assertEqual(args.conversion.table_mode, TableMode.FAST)
+
+    def test_table_mode_defaults_to_accurate(self) -> None:
+        with patch("sys.argv", ["docling-books-758-4", "--pages", "13-20"]):
+            args = parse_args_for_pipeline(PIPELINE_758_4)
+
+        self.assertEqual(args.conversion.table_mode, TableMode.ACCURATE)
+        self.assertIsNone(args.conversion.num_threads)
+
+    def test_parses_num_threads(self) -> None:
+        with patch(
+            "sys.argv",
+            [
+                "docling-books-758-4",
+                "--pages",
+                "13-20",
+                "--num-threads",
+                "8",
+            ],
+        ):
+            args = parse_args_for_pipeline(PIPELINE_758_4)
+
+        self.assertEqual(args.conversion.num_threads, 8)
 
 
 class BookSpecTest(unittest.TestCase):

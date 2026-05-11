@@ -2,7 +2,9 @@ import argparse
 from dataclasses import dataclass
 from pathlib import Path
 
+from docling_pdf2md.cache import DoclingCacheConfig
 from docling_pdf2md.converter import build_converter
+from docling_pdf2md.models import TableMode
 from .models import ConversionConfig, ImageExportConfig
 from .pipeline import BookPipeline
 
@@ -32,6 +34,18 @@ def parse_page_range(value: str) -> tuple[int, int]:
         )
 
     return start, end
+
+
+def parse_positive_int(value: str) -> int:
+    try:
+        number = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("Use a positive integer") from exc
+
+    if number < 1:
+        raise argparse.ArgumentTypeError("Value must be 1 or greater")
+
+    return number
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -83,6 +97,24 @@ def build_book_parser(pipeline: BookPipeline) -> argparse.ArgumentParser:
         help="Keep Docling image placeholders instead of extracting linked images.",
     )
     parser.add_argument(
+        "--table-mode",
+        choices=[mode.value for mode in TableMode],
+        default=TableMode.ACCURATE.value,
+        help=(
+            "Table structure mode for Docling PDF conversion. "
+            "Use fast or off for speed comparisons."
+        ),
+    )
+    parser.add_argument(
+        "--num-threads",
+        type=parse_positive_int,
+        metavar="N",
+        help=(
+            "Set Docling accelerator num_threads for model inference. "
+            "Defaults to Docling's configured value."
+        ),
+    )
+    parser.add_argument(
         "--no-pdf-repairs",
         action="store_true",
         help="Disable PDF-specific document repairs for comparison.",
@@ -96,6 +128,21 @@ def build_book_parser(pipeline: BookPipeline) -> argparse.ArgumentParser:
         "--markdown-spacing",
         action="store_true",
         help="Enable legacy final Markdown Japanese spacing repair for comparison.",
+    )
+    parser.add_argument(
+        "--profile",
+        action="store_true",
+        help="Print per-stage conversion timings after the result summary.",
+    )
+    parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Disable the Docling JSON document cache.",
+    )
+    parser.add_argument(
+        "--refresh-cache",
+        action="store_true",
+        help="Rebuild the Docling JSON document cache for this conversion.",
     )
     return parser
 
@@ -113,12 +160,20 @@ def parse_args_for_pipeline(pipeline: BookPipeline) -> CliArgs:
         all_sections=args.all_sections,
         conversion=ConversionConfig(
             do_ocr=args.ocr,
+            table_mode=TableMode(args.table_mode),
+            num_threads=args.num_threads,
             apply_pdf_repairs=not args.no_pdf_repairs,
             apply_markdown_polish=not args.no_markdown_polish,
             apply_markdown_spacing=args.markdown_spacing,
+            profile=args.profile,
             images=ImageExportConfig(
                 enabled=not args.no_images,
                 output_dir=pipeline.spec.image_output_dir,
+            ),
+            cache=DoclingCacheConfig(
+                enabled=not args.no_cache,
+                refresh=args.refresh_cache,
+                book_id=pipeline.spec.book_id,
             ),
         ),
     )
@@ -136,6 +191,8 @@ def run_book_cli(pipeline: BookPipeline) -> None:
         args.conversion.do_ocr,
         args.conversion.images.enabled,
         args.conversion.images.images_scale,
+        args.conversion.table_mode,
+        args.conversion.num_threads,
     )
 
     if args.all_sections:
