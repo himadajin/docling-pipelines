@@ -48,6 +48,7 @@ class ConversionConfig:
     apply_pdf_repairs: bool = True
     apply_markdown_polish: bool = True
     apply_markdown_spacing: bool = False
+    profile: bool = False
     markdown: MarkdownExportConfig = MarkdownExportConfig()
     images: ImageExportConfig = ImageExportConfig()
 

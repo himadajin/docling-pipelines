@@ -87,7 +87,7 @@ class BookPipeline:
                 config,
             )
 
-        elapsed, image_result = convert_to_markdown(
+        elapsed, image_result, profile = convert_to_markdown(
             converter=converter,
             input_pdf=self.spec.pdf_path,
             output_markdown=output_path,
@@ -113,6 +113,7 @@ class BookPipeline:
             config,
             image_result,
             section,
+            profile,
         )
 
     def render_markdown(

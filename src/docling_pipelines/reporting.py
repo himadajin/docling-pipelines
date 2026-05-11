@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from docling_pdf2md.models import ImageExportResult
+from docling_pdf2md.models import ConversionProfile, ImageExportResult
 
 from .models import ConversionConfig, Section
 
@@ -14,6 +14,7 @@ def print_result(
     config: ConversionConfig,
     image_result: ImageExportResult,
     section: Section | None = None,
+    profile: ConversionProfile | None = None,
 ) -> None:
     print(f"Book: {book_id}")
     print(f"Input: {input_pdf}")
@@ -35,3 +36,12 @@ def print_result(
     print(f"Output: {output_markdown.resolve()}")
     print(f"Output size: {output_markdown.stat().st_size:,} bytes")
     print(f"Elapsed: {elapsed:.1f} seconds")
+    if config.profile and profile:
+        print("Profile:")
+        print(f"  Docling convert: {profile.docling_convert_seconds:.3f}s")
+        print(f"  Document repairs: {profile.document_transform_seconds:.3f}s")
+        print(f"  Image save: {profile.image_save_seconds:.3f}s")
+        print(f"  Markdown export: {profile.markdown_export_seconds:.3f}s")
+        print(f"  Markdown render: {profile.markdown_render_seconds:.3f}s")
+        print(f"  Markdown write: {profile.markdown_write_seconds:.3f}s")
+        print(f"  Measured total: {profile.measured_seconds:.3f}s")

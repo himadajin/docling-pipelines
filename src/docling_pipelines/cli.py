@@ -97,6 +97,11 @@ def build_book_parser(pipeline: BookPipeline) -> argparse.ArgumentParser:
         action="store_true",
         help="Enable legacy final Markdown Japanese spacing repair for comparison.",
     )
+    parser.add_argument(
+        "--profile",
+        action="store_true",
+        help="Print per-stage conversion timings after the result summary.",
+    )
     return parser
 
 
@@ -116,6 +121,7 @@ def parse_args_for_pipeline(pipeline: BookPipeline) -> CliArgs:
             apply_pdf_repairs=not args.no_pdf_repairs,
             apply_markdown_polish=not args.no_markdown_polish,
             apply_markdown_spacing=args.markdown_spacing,
+            profile=args.profile,
             images=ImageExportConfig(
                 enabled=not args.no_images,
                 output_dir=pipeline.spec.image_output_dir,
